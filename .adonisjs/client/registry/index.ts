@@ -48,6 +48,12 @@ const routes = {
     tokens: [{"old":"/documents","type":0,"val":"documents","end":""}],
     types: placeholder as Registry['documents.index']['types'],
   },
+  'documents.bulkDestroy': {
+    methods: ["POST"],
+    pattern: '/documents/bulk-delete',
+    tokens: [{"old":"/documents/bulk-delete","type":0,"val":"documents","end":""},{"old":"/documents/bulk-delete","type":0,"val":"bulk-delete","end":""}],
+    types: placeholder as Registry['documents.bulkDestroy']['types'],
+  },
   'documents.upload': {
     methods: ["GET","HEAD"],
     pattern: '/documents/upload',
@@ -143,6 +149,24 @@ const routes = {
     pattern: '/folders/:id/permissions/:permissionId',
     tokens: [{"old":"/folders/:id/permissions/:permissionId","type":0,"val":"folders","end":""},{"old":"/folders/:id/permissions/:permissionId","type":1,"val":"id","end":""},{"old":"/folders/:id/permissions/:permissionId","type":0,"val":"permissions","end":""},{"old":"/folders/:id/permissions/:permissionId","type":1,"val":"permissionId","end":""}],
     types: placeholder as Registry['folder_permissions.destroy']['types'],
+  },
+  'trash.index': {
+    methods: ["GET","HEAD"],
+    pattern: '/trash',
+    tokens: [{"old":"/trash","type":0,"val":"trash","end":""}],
+    types: placeholder as Registry['trash.index']['types'],
+  },
+  'trash.restore': {
+    methods: ["POST"],
+    pattern: '/trash/restore',
+    tokens: [{"old":"/trash/restore","type":0,"val":"trash","end":""},{"old":"/trash/restore","type":0,"val":"restore","end":""}],
+    types: placeholder as Registry['trash.restore']['types'],
+  },
+  'trash.forceDelete': {
+    methods: ["POST"],
+    pattern: '/trash/force-delete',
+    tokens: [{"old":"/trash/force-delete","type":0,"val":"trash","end":""},{"old":"/trash/force-delete","type":0,"val":"force-delete","end":""}],
+    types: placeholder as Registry['trash.forceDelete']['types'],
   },
   'notifications.index': {
     methods: ["GET","HEAD"],

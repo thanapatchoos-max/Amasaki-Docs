@@ -46,6 +46,7 @@ export const swalConfirm = async ({
     title,
     text,
     icon,
+    iconColor: "#10b981",
     showCancelButton: true,
     confirmButtonColor,
     cancelButtonColor: "#64748b",
@@ -54,7 +55,7 @@ export const swalConfirm = async ({
     reverseButtons: true,
     customClass: {
       popup: "rounded-3xl p-6 font-sans shadow-2xl border border-slate-100",
-      title: "text-lg font-extrabold text-slate-900",
+      title: "text-lg font-extrabold text-slate-900 break-keep",
       htmlContainer: "text-sm text-slate-500 font-medium mt-2",
       confirmButton: "px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm",
       cancelButton: "px-5 py-2.5 rounded-xl font-bold text-sm transition-all",

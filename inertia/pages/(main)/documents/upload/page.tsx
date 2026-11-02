@@ -17,11 +17,11 @@ import {
 type FolderItem = { id: number; name: string };
 
 const SUPPORTED_TYPES = [
-  { ext: "PDF", name: "PDF Document", color: "bg-red-50 text-red-600 border-red-200" },
-  { ext: "DWG", name: "AutoCAD Drawing", color: "bg-emerald-50 text-emerald-600 border-emerald-200" },
-  { ext: "SLDPRT", name: "SolidWorks Part", color: "bg-amber-50 text-amber-700 border-amber-200" },
-  { ext: "SLDASM", name: "SolidWorks Assembly", color: "bg-purple-50 text-purple-700 border-purple-200" },
-  { ext: "SLDDRW", name: "SolidWorks Drawing", color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  { ext: "PDF", name: "PDF Document", color: "bg-rose-50 text-rose-700 border-rose-200/80" },
+  { ext: "DWG", name: "AutoCAD Drawing", color: "bg-sky-50 text-sky-700 border-sky-200/80" },
+  { ext: "SLDPRT", name: "SolidWorks Part", color: "bg-emerald-50 text-emerald-700 border-emerald-200/80" },
+  { ext: "SLDASM", name: "SolidWorks Assembly", color: "bg-emerald-50 text-emerald-700 border-emerald-200/80" },
+  { ext: "SLDDRW", name: "SolidWorks Drawing", color: "bg-emerald-50 text-emerald-700 border-emerald-200/80" },
 ];
 
 export default function DocumentUploadPage() {
@@ -63,7 +63,7 @@ export default function DocumentUploadPage() {
           <div>
             <h1 className="text-2xl font-black text-slate-900">อัปโหลดเอกสารใหม่</h1>
             <p className="text-sm text-slate-500 mt-0.5">
-              ระบบบริหารจัดการเอกสารวิศวกรรม บริษัท อมากาซากิ ไพพ (ประเทศไทย) จำกัด
+              Document Management System
             </p>
           </div>
         </div>

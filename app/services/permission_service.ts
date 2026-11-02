@@ -17,11 +17,6 @@ export default class PermissionService {
     action: DocumentAction,
     documentId: number
   ): Promise<boolean> {
-    // Admin bypasses all checks
-    if (user.roleId === 1) return true
-    await user.load('role')
-    if (user.role?.name === 'Admin') return true
-
     const doc = await Document.find(documentId)
     if (!doc) return false
 
@@ -56,11 +51,6 @@ export default class PermissionService {
     action: FolderAction,
     folderId: number
   ): Promise<boolean> {
-    // Admin bypasses all checks
-    if (user.roleId === 1) return true
-    await user.load('role')
-    if (user.role?.name === 'Admin') return true
-
     let currentFolderId: number | null = folderId
 
     while (currentFolderId) {
@@ -87,7 +77,7 @@ export default class PermissionService {
       }
 
       // Go up the tree
-      const folder = await Folder.find(currentFolderId)
+      const folder: typeof Folder.prototype | null = await Folder.find(currentFolderId)
       if (!folder || !folder.parentId) {
         break
       }

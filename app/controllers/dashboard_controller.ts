@@ -7,60 +7,65 @@ import { DateTime } from 'luxon'
 
 export default class DashboardController {
   async index({ inertia }: HttpContext) {
-    const totalDocs = await Document.query().where('is_deleted', false).count('* as total')
-    const totalFolders = await Folder.query().count('* as total')
-    
     const today = DateTime.now().startOf('day').toSQLDate()
     const in30Days = DateTime.now().plus({ days: 30 }).endOf('day').toSQLDate()
-    
-    const expiringSoonDocs = await Document.query()
-      .where('is_deleted', false)
-      .whereNotNull('expire_at')
-      .where('expire_at', '<=', in30Days)
-      .where('expire_at', '>=', today)
-      .count('* as total')
-      .catch(() => [{ $extras: { total: 0 } }])
+    const yesterday = DateTime.now().minus({ days: 1 }).toSQL()
 
-    const expiringList = await Document.query()
-      .where('is_deleted', false)
-      .whereNotNull('expire_at')
-      .where('expire_at', '<=', in30Days)
-      .where('expire_at', '>=', today)
-      .preload('folder')
-      .orderBy('expire_at', 'asc')
-      .limit(5)
-
-    const recentActions = await AuditLog.query()
-      .where('created_at', '>=', DateTime.now().minus({ days: 1 }).toSQL())
-      .count('* as total')
-      .catch(() => [{ $extras: { total: 0 } }])
-
-    const recentActivities = await AuditLog.query()
-      .preload('user')
-      .orderBy('created_at', 'desc')
-      .limit(8)
+    const [
+      totalDocs,
+      totalFolders,
+      expiringSoonDocs,
+      expiringList,
+      recentActions,
+      recentActivities,
+      typeBreakdown,
+      storageBreakdown
+    ] = await Promise.all([
+      Document.query().where('is_deleted', false).count('* as total'),
+      Folder.query().count('* as total'),
+      Document.query()
+        .where('is_deleted', false)
+        .whereNotNull('expire_at')
+        .where('expire_at', '<=', in30Days)
+        .where('expire_at', '>=', today)
+        .count('* as total')
+        .catch(() => [{ $extras: { total: 0 } }]),
+      Document.query()
+        .where('is_deleted', false)
+        .whereNotNull('expire_at')
+        .where('expire_at', '<=', in30Days)
+        .where('expire_at', '>=', today)
+        .preload('folder')
+        .orderBy('expire_at', 'asc')
+        .limit(5),
+      AuditLog.query()
+        .where('created_at', '>=', yesterday)
+        .count('* as total')
+        .catch(() => [{ $extras: { total: 0 } }]),
+      AuditLog.query()
+        .preload('user')
+        .orderBy('created_at', 'desc')
+        .limit(8),
+      db.rawQuery(`
+        SELECT extension, COUNT(*) as count 
+        FROM documents 
+        WHERE is_deleted = false 
+        GROUP BY extension
+      `).catch(() => []),
+      db.rawQuery(`
+        SELECT d.extension, SUM(dv.size) as total_size
+        FROM document_versions dv
+        JOIN documents d ON d.id = dv.document_id
+        WHERE d.is_deleted = false
+        GROUP BY d.extension
+      `).catch(() => [])
+    ])
 
     const docIds = recentActivities.map((a) => a.targetId).filter((id): id is number => id !== null)
-    const docs = await Document.query().whereIn('id', docIds).preload('folder')
+    const docs = docIds.length > 0 ? await Document.query().whereIn('id', docIds).preload('folder') : []
     const docMap = new Map(docs.map((d) => [d.id, d]))
 
-    const typeBreakdown = await db.rawQuery(`
-      SELECT extension, COUNT(*) as count 
-      FROM documents 
-      WHERE is_deleted = false 
-      GROUP BY extension
-    `).catch(() => [])
-    
     const typeBreakdownData = Array.isArray(typeBreakdown) ? typeBreakdown : typeBreakdown[0] || []
-
-    const storageBreakdown = await db.rawQuery(`
-      SELECT d.extension, SUM(dv.size) as total_size
-      FROM document_versions dv
-      JOIN documents d ON d.id = dv.document_id
-      WHERE d.is_deleted = false
-      GROUP BY d.extension
-    `).catch(() => [])
-    
     const storageBreakdownData = Array.isArray(storageBreakdown) ? storageBreakdown : storageBreakdown[0] || []
 
     return inertia.render('(main)/dashboard/page', {

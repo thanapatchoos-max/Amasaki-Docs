@@ -16,6 +16,7 @@ export interface ApiDefinition {
   }
   documents: {
     index: typeof routes['documents.index']
+    bulkDestroy: typeof routes['documents.bulkDestroy']
     upload: typeof routes['documents.upload']
     store: typeof routes['documents.store']
     show: typeof routes['documents.show']
@@ -36,6 +37,11 @@ export interface ApiDefinition {
   folderPermissions: {
     store: typeof routes['folder_permissions.store']
     destroy: typeof routes['folder_permissions.destroy']
+  }
+  trash: {
+    index: typeof routes['trash.index']
+    restore: typeof routes['trash.restore']
+    forceDelete: typeof routes['trash.forceDelete']
   }
   notifications: {
     index: typeof routes['notifications.index']

@@ -1,6 +1,7 @@
-import { usePage, Link } from "@inertiajs/react";
+import { usePage, Link, router } from "@inertiajs/react";
 import { MainLayout } from "@/layouts/default";
-import { ArrowLeft, Clock, Download, FileText, History, User, AlertTriangle, Upload, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Clock, Download, FileText, History, User, AlertTriangle, Upload, CheckCircle2, Trash2 } from "lucide-react";
+import { swalConfirm } from "@/lib/swal";
 
 type Version = {
   id: number;
@@ -23,7 +24,12 @@ type DocumentData = {
 };
 
 export default function DocumentDetailPage() {
-  const { document } = usePage<any>().props as { document: DocumentData };
+  const { props } = usePage<any>();
+  const { document } = props as { document: DocumentData };
+  const docPerms = props.user?.permissions?.documents || [];
+  const canDownload = docPerms.includes('download');
+  const canDelete = docPerms.includes('delete');
+  const canUpdateVersion = docPerms.includes('update_version');
 
   if (!document) {
     return (
@@ -77,13 +83,29 @@ export default function DocumentDetailPage() {
             <History className="size-4" />
             ดูเวอร์ชันทั้งหมด ({document.versions?.length || 0})
           </Link>
-          <a
-            href={`/documents/${document.id}/download`}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-sm shadow-emerald-600/30 transition-all"
-          >
-            <Download className="size-4" />
-            ดาวน์โหลดเวอร์ชันล่าสุด (v{document.latest_version})
-          </a>
+          {canDownload && (
+            <a
+              href={`/documents/${document.id}/download`}
+              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-sm shadow-emerald-600/30 transition-all"
+            >
+              <Download className="size-4" />
+              ดาวน์โหลดเวอร์ชันล่าสุด (v{document.latest_version})
+            </a>
+          )}
+          {canDelete && (
+            <button
+              onClick={async () => {
+                if (await swalConfirm({ title: 'คุณต้องการลบเอกสารนี้ใช่หรือไม่?', text: 'เอกสารจะถูกย้ายไปที่ถังขยะ' })) {
+                  router.delete(`/documents/${document.id}`);
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2.5 bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 hover:text-rose-700 text-sm font-bold rounded-xl transition-colors"
+              title="ลบเอกสาร"
+            >
+              <Trash2 className="size-4" />
+              ลบ
+            </button>
+          )}
         </div>
       </div>
 
@@ -151,13 +173,15 @@ export default function DocumentDetailPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-slate-500 font-medium">{formatSize(v.size)}</span>
-                    <a
-                      href={`/documents/versions/${v.id}/download`}
-                      className="p-2 hover:bg-emerald-100 text-slate-500 hover:text-emerald-600 rounded-lg transition-colors"
-                      title="ดาวน์โหลดเวอร์ชันนี้"
-                    >
-                      <Download className="size-4" />
-                    </a>
+                    {canDownload && (
+                      <a
+                        href={`/documents/versions/${v.id}/download`}
+                        className="p-2 hover:bg-emerald-100 text-slate-500 hover:text-emerald-600 rounded-lg transition-colors"
+                        title="ดาวน์โหลดเวอร์ชันนี้"
+                      >
+                        <Download className="size-4" />
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
@@ -167,31 +191,32 @@ export default function DocumentDetailPage() {
 
         {/* Action Sidebar */}
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <Upload className="size-4 text-emerald-600" />
-              อัปเดตเวอร์ชันใหม่
-            </h3>
-            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-              เมื่อมีการแก้ไขไฟล์งาน SolidWorks/AutoCAD หรือ PDF ให้อัปโหลดไฟล์ใหม่ระบบจะนับเป็น เวอร์ชัน v{document.latest_version + 1} อัตโนมัติ โดยไม่ทับไฟล์เดิม
-            </p>
-
-            <form action={`/documents/${document.id}/update`} method="POST" encType="multipart/form-data" className="space-y-3">
-              <input
-                type="file"
-                name="file"
-                required
-                className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
-              />
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-emerald-600/30"
-              >
-                <Upload className="size-4" />
-                อัปโหลดเป็น v{document.latest_version + 1}
-              </button>
-            </form>
-          </div>
+          {canUpdateVersion && (
+            <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <Upload className="size-4 text-emerald-600" />
+                อัปเดตเวอร์ชันใหม่
+              </h3>
+              <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                เมื่อมีการแก้ไขไฟล์งาน SolidWorks/AutoCAD หรือ PDF ให้อัปโหลดไฟล์ใหม่ระบบจะนับเป็น เวอร์ชัน v{document.latest_version + 1} อัตโนมัติ โดยไม่ทับไฟล์เดิม
+              </p>
+              <form action={`/documents/${document.id}/update`} method="POST" encType="multipart/form-data" className="space-y-3">
+                <input
+                  type="file"
+                  name="file"
+                  required
+                  className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                />
+                <button
+                  type="submit"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-emerald-600/30"
+                >
+                  <Upload className="size-4" />
+                  อัปโหลดเป็น v{document.latest_version + 1}
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </MainLayout>

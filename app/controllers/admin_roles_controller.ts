@@ -4,9 +4,7 @@ import User from '#models/user'
 import AuditLogService from '#services/audit_log_service'
 
 export default class AdminRolesController {
-  async index({ inertia, auth }: HttpContext) {
-    const user = auth.user!
-    
+  async index({ inertia }: HttpContext) {
     // Load all roles with user count
     const roles = await Role.query().orderBy('id', 'asc')
     const users = await User.query().select('id', 'roleId')
@@ -32,7 +30,7 @@ export default class AdminRolesController {
   }
 
   async create({ inertia }: HttpContext) {
-    return inertia.render('(main)/admin/roles/create/page')
+    return inertia.render('(main)/admin/roles/create/page', {})
   }
 
   async store({ request, response, auth, session }: HttpContext) {
@@ -55,7 +53,7 @@ export default class AdminRolesController {
       permissions: permissions || {} 
     })
 
-    await AuditLogService.log(user, 'Create', role.id, { type: 'role', name: role.name })
+    await AuditLogService.log(user, 'Create', role.id, { type: 'role', name: role.name }, 'role')
 
     session.flash('success', 'เพิ่มตำแหน่งใหม่เรียบร้อยแล้ว')
     return response.redirect().toRoute('admin.roles')
@@ -85,15 +83,10 @@ export default class AdminRolesController {
       return response.notFound()
     }
 
-    if (role.name === 'Admin') {
-      session.flash('error', 'ไม่สามารถแก้ไขตำแหน่ง Admin ของระบบได้')
-      return response.redirect().back()
-    }
-
     const { name, permissions } = request.only(['name', 'permissions'])
 
     if (!name || !name.trim()) {
-      session.flash('error', 'Role name is required')
+      session.flash('error', 'กรุณาระบุชื่อตำแหน่ง')
       return response.redirect().back()
     }
 
@@ -102,14 +95,14 @@ export default class AdminRolesController {
       session.flash('error', 'มีตำแหน่งนี้อยู่ในระบบแล้ว')
       return response.redirect().back()
     }
-
+    
     role.name = name.trim()
     role.permissions = permissions || {}
     await role.save()
 
-    await AuditLogService.log(user, 'Update', role.id, { type: 'role', name: role.name })
+    await AuditLogService.log(user, 'Edit', role.id, { type: 'role', name: role.name }, 'role')
 
-    session.flash('success', 'อัปเดตตำแหน่งเรียบร้อยแล้ว')
+    session.flash('success', 'อัปเดตตำแหน่งและกำหนดสิทธิ์เรียบร้อยแล้ว')
     return response.redirect().toRoute('admin.roles')
   }
 
@@ -121,10 +114,7 @@ export default class AdminRolesController {
       return response.notFound()
     }
 
-    if (role.name === 'Admin') {
-      session.flash('error', 'ไม่สามารถลบตำแหน่ง Admin ของระบบได้')
-      return response.redirect().back()
-    }
+    // Admin bypass removed
 
     // Check if users are assigned to this role
     const usersCount = await User.query().where('roleId', role.id).count('* as total')
@@ -135,7 +125,7 @@ export default class AdminRolesController {
 
     await role.delete()
 
-    await AuditLogService.log(user, 'Delete', role.id, { type: 'role', name: role.name })
+    await AuditLogService.log(user, 'Delete', role.id, { type: 'role', name: role.name }, 'role')
 
     session.flash('success', 'ลบตำแหน่งเรียบร้อยแล้ว')
     return response.redirect().back()

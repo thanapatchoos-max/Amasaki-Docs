@@ -1,11 +1,28 @@
-import { Head, Link, router } from '@inertiajs/react'
+import { Head, Link, router, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import { MainLayout } from "@/layouts/default";
-import { FolderOpen, FileText, Plus, Upload, Trash2, Edit2, ChevronRight, ChevronLeft, Shield, Pin } from 'lucide-react';
+import { FolderOpen, FileText, Plus, Upload, Trash2, Edit2, ChevronRight, ChevronLeft, Shield, Pin, Download, X } from 'lucide-react';
 import FolderPermissionModal from '@/components/FolderPermissionModal';
 import FolderFormModal from '@/components/FolderFormModal';
+import { swalConfirm } from '@/lib/swal';
+import { formatThaiDate, getExtensionBadgeClass, getPaginationItems } from '@/lib/utils';
 
 export default function FolderShow({ folder, breadcrumbs, documents, users, roles }: { folder: any, breadcrumbs: any[], documents: any[], users: any[], roles: any[] }) {
+  const { props } = usePage<any>()
+  const user = props.user
+  const folderPerms = user?.permissions?.folders || []
+  const docPerms = user?.permissions?.documents || []
+  
+  const canCreate = folderPerms.includes('create')
+  const canEdit = folderPerms.includes('edit')
+  const canDelete = folderPerms.includes('delete')
+  const canPin = folderPerms.includes('pin')
+  const canManagePerms = folderPerms.includes('manage_permissions')
+  
+  const canUploadDoc = docPerms.includes('upload')
+  const canDownloadDoc = docPerms.includes('download')
+  const canDeleteDoc = docPerms.includes('delete')
+
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isPermissionOpen, setIsPermissionOpen] = useState(false)
   const [newFolderName, setNewFolderName] = useState('')
@@ -75,8 +92,8 @@ export default function FolderShow({ folder, breadcrumbs, documents, users, role
       <div className="w-full h-full flex flex-col pt-2 pb-6">
         
         {/* Breadcrumbs */}
-        <nav className="flex mb-4 border-b border-emerald-100/60 pb-3 overflow-x-auto" aria-label="Breadcrumb">
-          <ol role="list" className="flex items-center space-x-2 text-sm text-slate-500 min-w-max">
+        <nav className="flex mb-4 border-b border-emerald-100/60 pb-3 pt-3 overflow-x-auto" aria-label="Breadcrumb">
+          <ol role="list" className="flex items-center space-x-2 text-sm text-slate-500 min-w-max py-1">
             <li>
               <Link href="/folders" className="flex items-center hover:text-emerald-600 transition-colors">
                 <FolderOpen className="h-5 w-5 flex-shrink-0 mr-1.5 text-emerald-600" />
@@ -118,27 +135,33 @@ export default function FolderShow({ folder, breadcrumbs, documents, users, role
           </div>
           
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setIsPermissionOpen(true)}
-              className="inline-flex items-center rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-slate-50 transition-all"
-            >
-              <Shield className="h-4 w-4 mr-2 text-slate-500" />
-              จัดการสิทธิ์
-            </button>
-            <Link
-              href={`/documents/upload?folderId=${folder.id}`}
-              className="inline-flex items-center rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-emerald-50/50 transition-all"
-            >
-              <Upload className="h-4 w-4 mr-2 text-slate-500" />
-              อัปโหลดเอกสาร
-            </Link>
-            <button
-              onClick={() => setIsCreateOpen(true)}
-              className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              สร้างโฟลเดอร์ย่อย
-            </button>
+            {canManagePerms && (
+              <button
+                onClick={() => setIsPermissionOpen(true)}
+                className="inline-flex items-center rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-slate-50 transition-all"
+              >
+                <Shield className="h-4 w-4 mr-2 text-slate-500" />
+                จัดการสิทธิ์
+              </button>
+            )}
+            {canUploadDoc && (
+              <Link
+                href={`/documents/upload?folderId=${folder.id}`}
+                className="inline-flex items-center rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-200 hover:bg-emerald-50/50 transition-all"
+              >
+                <Upload className="h-4 w-4 mr-2 text-slate-500" />
+                อัปโหลดเอกสาร
+              </Link>
+            )}
+            {canCreate && (
+              <button
+                onClick={() => setIsCreateOpen(true)}
+                className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                สร้างโฟลเดอร์ย่อย
+              </button>
+            )}
           </div>
         </div>
 
@@ -162,118 +185,94 @@ export default function FolderShow({ folder, breadcrumbs, documents, users, role
           />
         )}
 
-        {/* Folders Section */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center">
-              โฟลเดอร์ย่อย <span className="ml-2 bg-emerald-100/60 text-emerald-800 py-0.5 px-2.5 rounded-full text-xs font-semibold">{folder.children.length}</span>
-            </h2>
-            {folder.children.length > 8 && (
-              <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => scrollSubfolders('left')}
-                  className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors shadow-sm"
-                  title="เลื่อนซ้าย"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollSubfolders('right')}
-                  className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors shadow-sm"
-                  title="เลื่อนขวา"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
-          
-          {folder.children.length === 0 ? (
-            <div className="rounded-2xl border-2 border-dashed border-slate-200 p-8 text-center bg-white/50">
-              <FolderOpen className="mx-auto h-8 w-8 text-slate-300 mb-2" />
-              <p className="text-sm text-slate-500">ไม่มีโฟลเดอร์ย่อย</p>
+        {/* Folders Section - Only show when there are subfolders */}
+        {folder.children && folder.children.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2.5">
+              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <span>โฟลเดอร์ย่อย</span>
+                <span className="bg-emerald-100/70 text-emerald-800 py-0.2 px-2 rounded-full text-[11px] font-bold">
+                  {folder.children.length}
+                </span>
+              </h2>
             </div>
-          ) : (
+            
             <div 
               id="subfolders-scroll-container"
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 transition-all"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 transition-all"
             >
               {folder.children.map((child: any) => (
                 <div key={child.id} className="relative group">
                   <Link
                     href={`/folders/${child.id}`}
-                    className="group relative flex flex-col justify-between rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm hover:border-emerald-400 hover:shadow-lg transition-all h-[140px] overflow-hidden"
+                    className="flex items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white px-3 py-2 shadow-2xs hover:border-emerald-400 hover:bg-emerald-50/30 hover:shadow-xs transition-all overflow-hidden h-[50px]"
                   >
-                    <div className="absolute -right-4 -top-4 size-20 rounded-full bg-emerald-50/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0 pointer-events-none"></div>
-
-                    <div className="flex justify-between items-start z-10 w-full">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform group-hover:scale-105">
-                        <FolderOpen className="h-5 w-5 fill-emerald-100" />
-                      </div>
+                    <div className="size-7 shrink-0 flex items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100/80 group-hover:scale-105 transition-transform">
+                      <FolderOpen className="size-3.5 fill-emerald-100" />
                     </div>
                     
                     {editingId === child.id ? (
-                      <form onSubmit={handleEdit} className="z-10 mt-2 w-full" onClick={(e) => e.preventDefault()}>
+                      <form onSubmit={handleEdit} className="flex-1 flex items-center gap-1" onClick={(e) => e.preventDefault()}>
                         <input
                           type="text"
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
-                          className="block w-full text-xs font-bold rounded-lg border-0 py-1.5 px-2 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-emerald-600"
+                          className="block w-full text-xs font-bold rounded-md border-0 py-1 px-1.5 text-slate-900 shadow-2xs ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-emerald-600"
                           autoFocus
                         />
-                        <div className="mt-1.5 flex space-x-1.5">
-                          <button type="submit" className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded">Save</button>
-                          <button type="button" onClick={() => setEditingId(null)} className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded">Cancel</button>
-                        </div>
+                        <button type="submit" className="text-[10px] bg-emerald-600 text-white font-bold px-1.5 py-1 rounded">บันทึก</button>
+                        <button type="button" onClick={() => setEditingId(null)} className="text-[10px] bg-slate-100 text-slate-600 font-bold px-1.5 py-1 rounded">ยกเลิก</button>
                       </form>
                     ) : (
-                      <div className="z-10 mt-3 w-full">
-                        <div className="flex items-center gap-1.5 w-full">
-                          <h3 className="text-sm font-extrabold text-slate-800 group-hover:text-emerald-700 truncate" title={child.name}>
-                            {child.name}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-1 mt-1">
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                            โฟลเดอร์ย่อย
-                          </p>
-                        </div>
+                      <div className="flex-1 min-w-0 pr-1">
+                        <h3 className="text-xs font-bold text-slate-800 group-hover:text-emerald-700 truncate" title={child.name}>
+                          {child.name}
+                        </h3>
+                        <p className="text-[10px] text-slate-400 font-medium leading-none mt-0.5">
+                          โฟลเดอร์ย่อย
+                        </p>
                       </div>
                     )}
+
+                    {child.isPinned && (
+                      <Pin className="size-3 text-amber-500 fill-amber-400 shrink-0" />
+                    )}
+                    <ChevronRight className="size-3 text-slate-300 group-hover:text-emerald-600 transition-colors shrink-0" />
                   </Link>
 
                   {/* Hover Actions */}
                   {editingId !== child.id && (
-                    <div className="absolute top-1/2 -translate-y-1/2 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1 bg-white pl-2 rounded-lg">
-                      <button 
-                        onClick={(e) => handleTogglePin(e, child.id)} 
-                        className={`p-1.5 rounded-md transition-colors ${
-                          child.isPinned 
-                            ? 'text-amber-500 hover:bg-amber-50' 
-                            : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'
-                        }`} 
-                        title={child.isPinned ? "ยกเลิกปักหมุด" : "ปักหมุดโฟลเดอร์"}
-                      >
-                        <Pin className={`h-4 w-4 ${child.isPinned ? 'fill-amber-400' : ''}`} />
-                      </button>
-                      <button onClick={(e) => { e.preventDefault(); }} className="p-1.5 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="จัดการสิทธิ์">
-                        <Shield className="h-4 w-4" />
-                      </button>
-                      <button onClick={(e) => startEdit(e, child)} className="p-1.5 rounded-md text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="แก้ไขชื่อ">
-                        <Edit2 className="h-4 w-4" />
-                      </button>
-                      <button onClick={(e) => handleDelete(e, child.id)} className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="ลบโฟลเดอร์">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                    <div className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 bg-white/95 px-1 py-0.5 rounded-lg border border-slate-200/80 shadow-xs z-20">
+                      {canPin && (
+                        <button 
+                          onClick={(e) => handleTogglePin(e, child.id)} 
+                          className={`p-1 rounded transition-colors ${
+                            child.isPinned 
+                              ? 'text-amber-500 hover:bg-amber-50' 
+                              : 'text-slate-400 hover:text-amber-600 hover:bg-amber-50'
+                          }`} 
+                          title={child.isPinned ? "ยกเลิกปักหมุด" : "ปักหมุดโฟลเดอร์"}
+                        >
+                          <Pin className={`size-3.5 ${child.isPinned ? 'fill-amber-400' : ''}`} />
+                        </button>
+                      )}
+                      {canEdit && (
+                        <button onClick={(e) => startEdit(e, child)} className="p-1 rounded text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" title="แก้ไขชื่อ">
+                          <Edit2 className="size-3.5" />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button onClick={(e) => handleDelete(e, child.id)} className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="ลบโฟลเดอร์">
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Documents Section */}
         <div>
@@ -294,7 +293,10 @@ export default function FolderShow({ folder, breadcrumbs, documents, users, role
                   <tr>
                     <th className="py-4 pl-6 pr-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ชื่อเอกสาร</th>
                     <th className="px-3 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ประเภท</th>
+                    <th className="px-3 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ผู้สร้าง</th>
+                    <th className="px-3 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">เวอร์ชัน</th>
                     <th className="px-3 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">อัปเดตล่าสุด</th>
+                    <th className="px-3 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">วันหมดอายุ</th>
                     <th className="relative py-4 pl-3 pr-6"><span className="sr-only">จัดการ</span></th>
                   </tr>
                 </thead>
@@ -315,7 +317,27 @@ export default function FolderShow({ folder, breadcrumbs, documents, users, role
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <div className="flex items-center gap-2">
+                          <div className="h-6 w-6 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                            <span className="text-[10px] font-bold text-emerald-700">
+                              {doc.owner?.full_name?.charAt(0)?.toUpperCase() || '?'}
+                            </span>
+                          </div>
+                          <span className="truncate max-w-[120px]" title={doc.owner?.full_name || 'ไม่ทราบ'}>
+                            {doc.owner?.full_name || 'ไม่ทราบ'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-center">
+                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-[11px] font-bold text-slate-600">
+                          V.{doc.latest_version || 1}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {doc.updated_at || doc.updatedAt ? new Date(doc.updated_at || doc.updatedAt).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {doc.expire_at ? <span className="text-rose-600 font-medium">{new Date(doc.expire_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })}</span> : <span className="text-gray-400">ไม่มีวันหมดอายุ</span>}
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-6 text-right text-sm font-medium">
                         <Link 

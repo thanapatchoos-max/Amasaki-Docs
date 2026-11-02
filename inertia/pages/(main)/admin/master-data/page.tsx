@@ -832,7 +832,7 @@ function MasterDataPageContent() {
     );
   };
 
-  const softDelete = (id: string) => {
+  const softDelete = async (id: string) => {
     if (activeTab === "running") return;
     if (activeTab === "signature") {
       toggleSignatureActive(id);
@@ -843,7 +843,7 @@ function MasterDataPageContent() {
     if (!row) return;
     const guard = getDeleteGuard(activeTab as DataTabKey, row, data);
     if (guard.blocked) return;
-    if (!confirm("ยืนยันการลบรายการนี้?")) return;
+    if (!(await swalConfirm({ title: "ยืนยันการลบรายการนี้?" }))) return;
     setData((prev) => ({
       ...prev,
       [activeTab]: prev[activeTab as DataTabKey].map((r) => (r.id === id ? { ...r, isActive: false } : r)),

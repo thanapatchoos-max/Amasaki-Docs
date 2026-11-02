@@ -9,6 +9,12 @@ export default class Folder extends FolderSchema {
   @column()
   declare isPinned: boolean
 
+  @column()
+  declare isDeleted: boolean
+
+  @belongsTo(() => User, { foreignKey: 'createdBy' })
+  declare creator: BelongsTo<typeof User>
+
   @belongsTo(() => Folder, { foreignKey: 'parentId' })
   declare parent: BelongsTo<typeof Folder>
 

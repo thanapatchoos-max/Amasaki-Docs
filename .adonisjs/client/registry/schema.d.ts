@@ -91,6 +91,18 @@ export interface Registry {
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/documents_controller').default['index']>>>
     }
   }
+  'documents.bulkDestroy': {
+    methods: ["POST"]
+    pattern: '/documents/bulk-delete'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/documents_controller').default['bulkDestroy']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/documents_controller').default['bulkDestroy']>>>
+    }
+  }
   'documents.upload': {
     methods: ["GET","HEAD"]
     pattern: '/documents/upload'
@@ -281,6 +293,42 @@ export interface Registry {
       query: {}
       response: ExtractResponse<Awaited<ReturnType<import('#controllers/folder_permissions_controller').default['destroy']>>>
       errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/folder_permissions_controller').default['destroy']>>>
+    }
+  }
+  'trash.index': {
+    methods: ["GET","HEAD"]
+    pattern: '/trash'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/trash_controller').default['index']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/trash_controller').default['index']>>>
+    }
+  }
+  'trash.restore': {
+    methods: ["POST"]
+    pattern: '/trash/restore'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/trash_controller').default['restore']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/trash_controller').default['restore']>>>
+    }
+  }
+  'trash.forceDelete': {
+    methods: ["POST"]
+    pattern: '/trash/force-delete'
+    types: {
+      body: {}
+      paramsTuple: []
+      params: {}
+      query: {}
+      response: ExtractResponse<Awaited<ReturnType<import('#controllers/trash_controller').default['forceDelete']>>>
+      errorResponse: ExtractErrorResponse<Awaited<ReturnType<import('#controllers/trash_controller').default['forceDelete']>>>
     }
   }
   'notifications.index': {

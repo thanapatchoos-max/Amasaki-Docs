@@ -115,7 +115,7 @@ export class FolderPermissionSchema extends BaseModel {
 }
 
 export class FolderSchema extends BaseModel {
-  static $columns = ['createdAt', 'createdBy', 'id', 'isPinned', 'name', 'parentId', 'updatedAt'] as const
+  static $columns = ['createdAt', 'createdBy', 'id', 'isDeleted', 'isPinned', 'name', 'parentId', 'updatedAt'] as const
   $columns = FolderSchema.$columns
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
@@ -124,6 +124,8 @@ export class FolderSchema extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
   @column()
+  declare isDeleted: boolean
+  @column()
   declare isPinned: boolean | null
   @column()
   declare name: string
@@ -131,6 +133,31 @@ export class FolderSchema extends BaseModel {
   declare parentId: number | null
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+}
+
+export class NotificationSchema extends BaseModel {
+  static $columns = ['createdAt', 'documentId', 'id', 'isRead', 'message', 'readAt', 'title', 'type', 'updatedAt', 'userId'] as const
+  $columns = NotificationSchema.$columns
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+  @column()
+  declare documentId: number | null
+  @column({ isPrimary: true })
+  declare id: number
+  @column()
+  declare isRead: boolean | null
+  @column()
+  declare message: string
+  @column.dateTime()
+  declare readAt: DateTime | null
+  @column()
+  declare title: string
+  @column()
+  declare type: string
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime | null
+  @column()
+  declare userId: number | null
 }
 
 export class RoleSchema extends BaseModel {

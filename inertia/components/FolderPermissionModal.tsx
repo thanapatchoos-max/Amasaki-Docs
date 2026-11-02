@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { router } from '@inertiajs/react'
 import { X, Shield, Trash2, User, Users } from 'lucide-react'
+import { swalConfirm } from '@/lib/swal'
 
 interface Props {
   folder: any
@@ -35,8 +36,8 @@ export default function FolderPermissionModal({ folder, users, roles, onClose }:
     })
   }
 
-  const handleRemove = (permissionId: number) => {
-    if (confirm('แน่ใจหรือไม่ที่จะลบสิทธิ์นี้?')) {
+  const handleRemove = async (permissionId: number) => {
+    if (await swalConfirm({ title: 'แน่ใจหรือไม่ที่จะลบสิทธิ์นี้?' })) {
       router.delete(`/folders/${folder.id}/permissions/${permissionId}`)
     }
   }

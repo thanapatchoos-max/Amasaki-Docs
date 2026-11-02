@@ -26,7 +26,15 @@ type Document = {
 };
 
 export default function DocumentsPage() {
-  const { documents = [], meta = {}, filters = {} } = usePage<any>().props as {
+  const { props } = usePage<any>();
+  const user = props.user;
+  const docPerms = user?.permissions?.documents || [];
+  
+  const canUpload = docPerms.includes('upload');
+  const canDownload = docPerms.includes('download');
+  const canDelete = docPerms.includes('delete');
+
+  const { documents = [], meta = {}, filters = {} } = props as {
     documents: Document[];
     meta: { current_page: number; last_page: number; total: number };
     filters: any;
@@ -101,13 +109,15 @@ export default function DocumentsPage() {
           <h1 className="text-2xl font-black text-slate-900 tracking-tight">เอกสาร</h1>
           <p className="text-sm font-medium text-slate-500 mt-1">{meta.total ?? documents.length} รายการ</p>
         </div>
-        <Link
-          href="/documents/upload"
-          className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-sm shadow-emerald-600/20 transition-all"
-        >
-          <Upload className="size-4" />
-          อัปโหลดเอกสาร
-        </Link>
+        {canUpload && (
+          <Link
+            href="/documents/upload"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-sm shadow-emerald-600/20 transition-all"
+          >
+            <Upload className="size-4" />
+            อัปโหลดเอกสาร
+          </Link>
+        )}
       </div>
 
       {/* Advanced Filters */}
@@ -224,12 +234,14 @@ export default function DocumentsPage() {
                     <div className="flex flex-col items-center gap-3">
                       <FolderOpen className="size-12 text-slate-300" />
                       <p className="text-slate-400 font-medium">ยังไม่มีเอกสาร</p>
-                      <Link
-                        href="/documents/upload"
-                        className="text-emerald-600 text-sm font-semibold hover:underline"
-                      >
-                        อัปโหลดเอกสารแรก
-                      </Link>
+                      {canUpload && (
+                        <Link
+                          href="/documents/upload"
+                          className="text-emerald-600 text-sm font-semibold hover:underline"
+                        >
+                          อัปโหลดเอกสารแรก
+                        </Link>
+                      )}
                     </div>
                   </td>
                 </tr>

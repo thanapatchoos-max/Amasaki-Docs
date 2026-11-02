@@ -31,4 +31,22 @@ export default defineConfig({
       ignored: ['**/storage/**', '**/tmp/**'],
     },
   },
+
+  build: {
+    target: 'esnext',
+    cssMinify: true,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('recharts')) return 'charts';
+            if (id.includes('lucide-react')) return 'icons';
+            if (id.includes('sweetalert2') || id.includes('luxon') || id.includes('axios')) return 'utils';
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
 })

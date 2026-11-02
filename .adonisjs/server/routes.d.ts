@@ -11,6 +11,7 @@ export type ScannedRoutes = {
     'dashboard.expiring': { paramsTuple?: []; params?: {} }
     'reports.index': { paramsTuple?: []; params?: {} }
     'documents.index': { paramsTuple?: []; params?: {} }
+    'documents.bulkDestroy': { paramsTuple?: []; params?: {} }
     'documents.upload': { paramsTuple?: []; params?: {} }
     'documents.store': { paramsTuple?: []; params?: {} }
     'documents.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
@@ -27,6 +28,9 @@ export type ScannedRoutes = {
     'folders.destroy': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'folder_permissions.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'folder_permissions.destroy': { paramsTuple: [ParamValue,ParamValue]; params: {'id': ParamValue,'permissionId': ParamValue} }
+    'trash.index': { paramsTuple?: []; params?: {} }
+    'trash.restore': { paramsTuple?: []; params?: {} }
+    'trash.forceDelete': { paramsTuple?: []; params?: {} }
     'notifications.index': { paramsTuple?: []; params?: {} }
     'admin.users': { paramsTuple?: []; params?: {} }
     'admin.users.store': { paramsTuple?: []; params?: {} }
@@ -53,6 +57,7 @@ export type ScannedRoutes = {
     'documents.downloadVersion': { paramsTuple: [ParamValue]; params: {'versionId': ParamValue} }
     'folders.index': { paramsTuple?: []; params?: {} }
     'folders.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'trash.index': { paramsTuple?: []; params?: {} }
     'notifications.index': { paramsTuple?: []; params?: {} }
     'admin.users': { paramsTuple?: []; params?: {} }
     'admin.audit_logs': { paramsTuple?: []; params?: {} }
@@ -73,6 +78,7 @@ export type ScannedRoutes = {
     'documents.downloadVersion': { paramsTuple: [ParamValue]; params: {'versionId': ParamValue} }
     'folders.index': { paramsTuple?: []; params?: {} }
     'folders.show': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'trash.index': { paramsTuple?: []; params?: {} }
     'notifications.index': { paramsTuple?: []; params?: {} }
     'admin.users': { paramsTuple?: []; params?: {} }
     'admin.audit_logs': { paramsTuple?: []; params?: {} }
@@ -83,11 +89,14 @@ export type ScannedRoutes = {
   POST: {
     'session.store': { paramsTuple?: []; params?: {} }
     'session.destroy': { paramsTuple?: []; params?: {} }
+    'documents.bulkDestroy': { paramsTuple?: []; params?: {} }
     'documents.store': { paramsTuple?: []; params?: {} }
     'documents.updateVersion': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'folders.store': { paramsTuple?: []; params?: {} }
     'folders.pin': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
     'folder_permissions.store': { paramsTuple: [ParamValue]; params: {'id': ParamValue} }
+    'trash.restore': { paramsTuple?: []; params?: {} }
+    'trash.forceDelete': { paramsTuple?: []; params?: {} }
     'admin.users.store': { paramsTuple?: []; params?: {} }
     'admin.roles.store': { paramsTuple?: []; params?: {} }
   }

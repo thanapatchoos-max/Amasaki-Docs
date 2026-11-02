@@ -4,14 +4,15 @@
  */
 
 export const controllers = {
+  AdminRoles: () => import('#controllers/admin_roles_controller'),
   AdminUsers: () => import('#controllers/admin_users_controller'),
   AuditLogs: () => import('#controllers/audit_logs_controller'),
   Dashboard: () => import('#controllers/dashboard_controller'),
   Documents: () => import('#controllers/documents_controller'),
+  FolderPermissions: () => import('#controllers/folder_permissions_controller'),
   Folders: () => import('#controllers/folders_controller'),
   NewAccount: () => import('#controllers/new_account_controller'),
-  Session: () => import('#controllers/session_controller'),
-  FolderPermissions: () => import('#controllers/folder_permissions_controller'),
-  AdminRoles: () => import('#controllers/admin_roles_controller'),
   Reports: () => import('#controllers/reports_controller'),
+  Session: () => import('#controllers/session_controller'),
+  Trash: () => import('#controllers/trash_controller'),
 }

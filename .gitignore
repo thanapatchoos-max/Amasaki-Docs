@@ -9,6 +9,25 @@ tmp/*
 .env.local
 .env.production.local
 .env.development.local
+.env.*
+!.env.example
+!.env.test
+
+# Local data, uploads, credentials, and backups
+*.sqlite*
+*.db
+*.db-*
+*.sql
+*.dump
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.log
+uploads/
+storage/
+coverage/
 
 # Frontend assets compiled code
 public/assets

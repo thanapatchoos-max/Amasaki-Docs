@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback } from '@views/components/ui/avatar';
 import { useToast } from '@views/components/providers/ToastProvider';
+import { swalConfirm } from "@/lib/swal";
 import { adminService } from "@/controllers/services/admin.service";
 // Removed mock imports
 import {
@@ -291,7 +292,7 @@ function UsersListView({
 
   const handleToggleStatus = async (user: ConfigUser) => {
     const next = !user.isActive;
-    if (!confirm(`${next ? "เปิดใช้งาน" : "ปิดใช้งาน"} ${user.fullName}?`)) return;
+    if (!(await swalConfirm({ title: `${next ? "เปิดใช้งาน" : "ปิดใช้งาน"} ${user.fullName}?` }))) return;
     setTogglingId(user.id);
     try {
       await adminService.toggleUserActive(user.id);
@@ -978,7 +979,7 @@ function CreateUserForm({
     return next;
   };
 
-  const handleBack = () => {
+  const handleBack = async () => {
     const hasData =
       user.fullName.trim() ||
       user.email.trim() ||
@@ -989,7 +990,9 @@ function CreateUserForm({
       user.position !== (allPositions[0] ?? "") ||
       user.role !== USER_ROLE_OPTIONS[0] ||
       !user.isActive;
-    if (hasData && !confirm("ยังไม่ได้บันทึกข้อมูล ต้องการออกจากหน้านี้หรือไม่?")) return;
+    if (hasData) {
+      if (!(await swalConfirm({ title: "ยังไม่ได้บันทึกข้อมูล", text: "ต้องการออกจากหน้านี้หรือไม่?" }))) return;
+    }
     onBack();
   };
 

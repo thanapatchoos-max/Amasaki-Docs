@@ -11,7 +11,14 @@ interface RoleItem {
 }
 
 export default function AdminRolesPage() {
-  const { roles = [] } = usePage<any>().props as { roles: RoleItem[] };
+  const { props } = usePage<any>();
+  const { roles = [] } = props as { roles: RoleItem[] };
+  const user = props.user;
+  const rolePerms = user?.permissions?.roles || [];
+  
+  const canCreate = rolePerms.includes('create');
+  const canEdit = rolePerms.includes('edit');
+  const canDelete = rolePerms.includes('delete');
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [roleName, setRoleName] = useState('');
@@ -38,10 +45,6 @@ export default function AdminRolesPage() {
   };
 
   const handleDeleteRole = (role: RoleItem) => {
-    if (role.name === 'Admin') {
-      alert('ไม่สามารถลบตำแหน่ง Admin ได้');
-      return;
-    }
     if (role.user_count > 0) {
       alert(`ไม่สามารถลบตำแหน่งนี้ได้ เนื่องจากมีผู้ใช้งานสังกัดอยู่ ${role.user_count} คน`);
       return;
@@ -68,14 +71,17 @@ export default function AdminRolesPage() {
               กำหนดตำแหน่งหน้าที่ของผู้ใช้งานและสิทธิ์การเข้าถึงในระบบ
             </p>
           </div>
-          
-          <Link
-            href="/admin/roles/create"
-            className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            เพิ่มตำแหน่งใหม่
-          </Link>
+          <div className="flex items-center gap-3 shrink-0">
+            {canCreate && (
+              <Link
+                href="/admin/roles/create"
+                className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 transition-all"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                เพิ่มตำแหน่งใหม่
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Stat Summary Cards */}
@@ -155,7 +161,7 @@ export default function AdminRolesPage() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-xl ${role.name === 'Admin' ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                          <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
                             <Shield className="h-4 w-4" />
                           </div>
                           <div>
@@ -171,25 +177,24 @@ export default function AdminRolesPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${
-                          role.name === 'Admin' 
-                            ? 'bg-rose-100 text-rose-700' 
-                            : 'bg-emerald-100 text-emerald-700'
-                        }`}>
-                          {role.name === 'Admin' ? 'ระบบหลัก (System)' : 'กำหนดเอง (Custom)'}
+                        <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700">
+                          กำหนดเอง (Custom)
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Link
-                            href={`/admin/roles/${role.id}/edit`}
-                            className="p-2 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
-                            title="แก้ไขตำแหน่ง"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Link>
-                          {role.name !== 'Admin' && (
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {canEdit && (
+                            <Link
+                              href={`/admin/roles/${role.id}/edit`}
+                              className="p-2 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors"
+                              title="แก้ไขตำแหน่ง"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Link>
+                          )}
+                          {canDelete && (
                             <button
+                              type="button"
                               onClick={() => handleDeleteRole(role)}
                               className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                               title="ลบตำแหน่ง"

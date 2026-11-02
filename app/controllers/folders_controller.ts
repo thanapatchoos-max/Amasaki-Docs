@@ -10,7 +10,9 @@ export default class FoldersController {
     const user = auth.user!
     // Get all root folders (parentId = null) that the user can view
     const allFolders = await Folder.query()
-      .preload('children')
+      .where((q) => q.whereNull('isDeleted').orWhere('isDeleted', false).orWhere('isDeleted', 0))
+      .preload('children', (q) => q.where((sq) => sq.whereNull('isDeleted').orWhere('isDeleted', false).orWhere('isDeleted', 0)))
+      .preload('documents', (q) => q.where((sq) => sq.whereNull('isDeleted').orWhere('isDeleted', false).orWhere('isDeleted', 0)))
       .preload('permissions', (q) => {
         q.preload('user').preload('role')
       })
@@ -47,11 +49,15 @@ export default class FoldersController {
       recentFolders: recentFolders.map(f => {
         const s = f.serialize()
         s.permissions = f.permissions?.map(p => p.serialize()) || []
+        s.documentsCount = f.documents?.length || 0
+        s.childrenCount = f.children?.length || 0
         return s
       }),
       folders: rootFolders.map(f => {
         const s = f.serialize()
         s.permissions = f.permissions?.map(p => p.serialize()) || []
+        s.documentsCount = f.documents?.length || 0
+        s.childrenCount = f.children?.length || 0
         return s
       }),
       users: users.map(u => u.serialize()),
@@ -77,11 +83,12 @@ export default class FoldersController {
       return response.forbidden('You do not have permission to view this folder')
     }
 
-    await folder.load('children')
+    await folder.load('children', (q) => q.where((sq) => sq.whereNull('isDeleted').orWhere('isDeleted', false).orWhere('isDeleted', 0)))
     const documentsQuery = Document.query()
       .where('folderId', folder.id)
       .where((q) => q.whereNull('isDeleted').orWhere('isDeleted', false).orWhere('isDeleted', 0))
       .preload('versions', (q) => q.orderBy('versionNumber', 'desc'))
+      .preload('owner', (q) => q.select('id', 'username', 'fullName'))
 
     let documents = await documentsQuery
     
@@ -130,6 +137,10 @@ export default class FoldersController {
         name: doc.name,
         extension: doc.extension,
         updated_at: doc.updatedAt?.toISO() || doc.createdAt?.toISO() || new Date().toISOString(),
+        created_at: doc.createdAt?.toISO() || new Date().toISOString(),
+        expire_at: doc.expireAt?.toISO() || null,
+        latest_version: doc.versions?.[0]?.versionNumber || 1,
+        owner: doc.owner ? { full_name: doc.owner.fullName || doc.owner.username, username: doc.owner.username } : null,
       })),
       users: users.map(u => u.serialize()),
       roles: roles.map(r => r.serialize()),
@@ -265,12 +276,12 @@ export default class FoldersController {
         await deleteFolderRecursive(child.id)
       }
 
-      // 3. Delete permissions for this folder
-      const { default: FolderPermission } = await import('#models/folder_permission')
-      await FolderPermission.query().where('folderId', fId).delete()
+      // 3. Delete permissions for this folder (skip, keep them for restore)
+      // const { default: FolderPermission } = await import('#models/folder_permission')
+      // await FolderPermission.query().where('folderId', fId).delete()
 
-      // 4. Delete the folder record itself
-      await Folder.query().where('id', fId).delete()
+      // 4. Soft-delete the folder record itself
+      await Folder.query().where('id', fId).update({ isDeleted: true })
     }
 
     const folderName = folder.name

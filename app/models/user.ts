@@ -6,7 +6,7 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { belongsTo } from '@adonisjs/lucid/orm'
 import Role from '#models/role'
 
-const AuthFinder = withAuthFinder(hash, {
+const AuthFinder = withAuthFinder(() => hash.use(), {
   uids: ['username'],
   passwordColumnName: 'password',
 })
@@ -21,6 +21,8 @@ export default class User extends compose(UserSchema, AuthFinder) {
   }
 
   get isAdmin() {
-    return this.roleId === 1 || (this as any).role?.name === 'Admin'
+    // Hardcoded Admin bypass removed as requested.
+    // All access should now be governed by dynamic permissions.
+    return false
   }
 }

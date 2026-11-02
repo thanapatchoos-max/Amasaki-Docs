@@ -3,6 +3,8 @@ import { Head, Link, usePage, router } from '@inertiajs/react';
 import { MainLayout } from "@/layouts/default";
 import { AlertCircle, FileText, FolderOpen, ArrowLeft, User, ChevronLeft, ChevronRight } from 'lucide-react';
 
+import { formatThaiDate, getExtensionBadgeClass } from "@/lib/utils";
+
 interface ExpiringDocument {
   id: number;
   name: string;
@@ -12,14 +14,6 @@ interface ExpiringDocument {
   folder_name: string;
   owner: string;
 }
-
-const EXT_COLOR: Record<string, string> = {
-  pdf: "bg-rose-50 text-rose-700 border-rose-200",
-  sldprt: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  sldasm: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  slddrw: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  dwg: "bg-teal-50 text-teal-800 border-teal-200",
-};
 
 export default function ExpiringDocumentsPage() {
   const { documents = [] } = usePage<any>().props as { documents: ExpiringDocument[] };
@@ -119,9 +113,7 @@ export default function ExpiringDocumentsPage() {
 
                       {/* Type & Version */}
                       <div className="col-span-2 flex items-center justify-start md:justify-center gap-3">
-                        <span className={`inline-block px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase ${
-                          EXT_COLOR[doc.extension.toLowerCase()] ?? "bg-slate-50 text-slate-600 border-slate-200"
-                        }`}>
+                        <span className={`inline-block px-2.5 py-1 rounded-md text-[10px] font-bold border uppercase ${getExtensionBadgeClass(doc.extension)}`}>
                           {doc.extension}
                         </span>
                         <span className="inline-block px-2 py-0.5 bg-slate-100/80 text-slate-700 border border-slate-200/60 rounded font-bold text-xs">

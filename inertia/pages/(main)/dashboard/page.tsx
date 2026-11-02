@@ -8,7 +8,8 @@ import {
   User,
   Clock,
   ChevronRight,
-  HardDrive
+  HardDrive,
+  LayoutDashboard
 } from "lucide-react";
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
 
@@ -72,11 +73,11 @@ const ACTION_COLOR: Record<string, string> = {
 };
 
 const EXT_COLOR: Record<string, string> = {
-  pdf: "bg-rose-50 text-rose-700 border-rose-200",
-  sldprt: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  sldasm: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  slddrw: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  dwg: "bg-teal-50 text-teal-800 border-teal-200",
+  pdf: "bg-rose-50 text-rose-700 border-rose-200/80 font-bold",
+  dwg: "bg-sky-50 text-sky-700 border-sky-200/80 font-bold",
+  sldprt: "bg-emerald-50 text-emerald-700 border-emerald-200/80 font-bold",
+  sldasm: "bg-emerald-50 text-emerald-700 border-emerald-200/80 font-bold",
+  slddrw: "bg-emerald-50 text-emerald-700 border-emerald-200/80 font-bold",
 };
 
 function StatCard({
@@ -140,13 +141,20 @@ export default function DashboardPage() {
   return (
     <MainLayout>
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">ภาพรวมระบบ</h1>
-        <p className="text-sm font-medium text-slate-500 mt-1">ยินดีต้อนรับ, {displayName}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
+        <div className="flex items-center gap-3">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 shadow-sm shrink-0">
+            <LayoutDashboard className="size-5 text-emerald-600" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Dashboard</h1>
+            <p className="text-xs sm:text-sm font-medium text-slate-500 mt-0.5">ยินดีต้อนรับ, {displayName}</p>
+          </div>
+        </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <StatCard
           label="เอกสารทั้งหมด"
           value={stats.total_documents}

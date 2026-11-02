@@ -358,8 +358,10 @@ function CreateRoleForm({
     onBack();
   };
 
-  const handleBack = () => {
-    if (dirty && !confirm("ยังไม่ได้บันทึกข้อมูล ต้องการออกจากหน้านี้หรือไม่?")) return;
+  const handleBack = async () => {
+    if (dirty) {
+      if (!(await swalConfirm({ title: "ยังไม่ได้บันทึกข้อมูล", text: "ต้องการออกจากหน้านี้หรือไม่?" }))) return;
+    }
     onBack();
   };
 

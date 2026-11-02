@@ -31,6 +31,10 @@ declare module '@adonisjs/inertia/types' {
     '(main)/admin/master-data/page': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/master-data/page.tsx'))['default']>
     '(main)/admin/master-data/WorkflowTab': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/master-data/WorkflowTab.tsx'))['default']>
     '(main)/admin/reports/page': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/reports/page.tsx'))['default']>
+    '(main)/admin/roles/create/page': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/roles/create/page.tsx'))['default']>
+    '(main)/admin/roles/edit/page': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/roles/edit/page.tsx'))['default']>
+    '(main)/admin/roles/page': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/roles/page.tsx'))['default']>
+    '(main)/admin/roles/RoleForm': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/roles/RoleForm.tsx'))['default']>
     '(main)/admin/users/page': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/users/page.tsx'))['default']>
     '(main)/approvals/[id]/page': ExtractProps<(typeof import('../../inertia/pages/(main)/approvals/[id]/page.tsx'))['default']>
     '(main)/approvals/history/page': ExtractProps<(typeof import('../../inertia/pages/(main)/approvals/history/page.tsx'))['default']>
@@ -38,6 +42,7 @@ declare module '@adonisjs/inertia/types' {
     '(main)/dashboard/page': ExtractProps<(typeof import('../../inertia/pages/(main)/dashboard/page.tsx'))['default']>
     '(main)/documents/[id]/page': ExtractProps<(typeof import('../../inertia/pages/(main)/documents/[id]/page.tsx'))['default']>
     '(main)/documents/[id]/versions/page': ExtractProps<(typeof import('../../inertia/pages/(main)/documents/[id]/versions/page.tsx'))['default']>
+    '(main)/documents/expiring/page': ExtractProps<(typeof import('../../inertia/pages/(main)/documents/expiring/page.tsx'))['default']>
     '(main)/documents/page': ExtractProps<(typeof import('../../inertia/pages/(main)/documents/page.tsx'))['default']>
     '(main)/documents/upload/page': ExtractProps<(typeof import('../../inertia/pages/(main)/documents/upload/page.tsx'))['default']>
     '(main)/folders/[id]/page': ExtractProps<(typeof import('../../inertia/pages/(main)/folders/[id]/page.tsx'))['default']>
@@ -45,6 +50,8 @@ declare module '@adonisjs/inertia/types' {
     '(main)/layout': ExtractProps<(typeof import('../../inertia/pages/(main)/layout.tsx'))['default']>
     '(main)/notifications/page': ExtractProps<(typeof import('../../inertia/pages/(main)/notifications/page.tsx'))['default']>
     '(main)/profile/page': ExtractProps<(typeof import('../../inertia/pages/(main)/profile/page.tsx'))['default']>
+    '(main)/reports/page': ExtractProps<(typeof import('../../inertia/pages/(main)/reports/page.tsx'))['default']>
+    '(main)/trash/page': ExtractProps<(typeof import('../../inertia/pages/(main)/trash/page.tsx'))['default']>
     'auth/login': ExtractProps<(typeof import('../../inertia/pages/auth/login.tsx'))['default']>
     'auth/signup': ExtractProps<(typeof import('../../inertia/pages/auth/signup.tsx'))['default']>
     'errors/not_found': ExtractProps<(typeof import('../../inertia/pages/errors/not_found.tsx'))['default']>
@@ -52,11 +59,5 @@ declare module '@adonisjs/inertia/types' {
     'home': ExtractProps<(typeof import('../../inertia/pages/home.tsx'))['default']>
     'layout': ExtractProps<(typeof import('../../inertia/pages/layout.tsx'))['default']>
     'page': ExtractProps<(typeof import('../../inertia/pages/page.tsx'))['default']>
-    '(main)/admin/roles/page': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/roles/page.tsx'))['default']>
-    '(main)/documents/expiring/page': ExtractProps<(typeof import('../../inertia/pages/(main)/documents/expiring/page.tsx'))['default']>
-    '(main)/admin/roles/RoleForm': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/roles/RoleForm.tsx'))['default']>
-    '(main)/admin/roles/create/page': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/roles/create/page.tsx'))['default']>
-    '(main)/admin/roles/edit/page': ExtractProps<(typeof import('../../inertia/pages/(main)/admin/roles/edit/page.tsx'))['default']>
-    '(main)/reports/page': ExtractProps<(typeof import('../../inertia/pages/(main)/reports/page.tsx'))['default']>
   }
 }

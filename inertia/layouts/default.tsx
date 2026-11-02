@@ -10,7 +10,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
       <AppSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header />
-        <main className="flex-1 overflow-y-auto px-6 pb-6 lg:px-8 lg:pb-8">
+        <main className="flex-1 overflow-y-auto px-6 py-5 lg:px-8 lg:py-6">
           {children}
         </main>
       </div>
@@ -21,7 +21,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
 
 export function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-slate-900 to-emerald-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#EBF7EF] via-[#F3FAF5] to-[#DDF2E4] flex items-center justify-center p-4">
       {children}
       <Toaster position="top-center" richColors />
     </div>

@@ -1,4 +1,4 @@
-﻿import { Head, Link } from '@inertiajs/react'
+import { Head, Link } from '@inertiajs/react'
 import { MainLayout } from '@/layouts/default'
 import { ChevronLeft } from 'lucide-react'
 import RoleForm from '../RoleForm'
@@ -6,7 +6,7 @@ import RoleForm from '../RoleForm'
 export default function RoleEdit({ role }: { role: any }) {
   return (
     <MainLayout>
-      <Head title={\แก้ไขตำแหน่ง: \\} />
+      <Head title={`แก้ไขตำแหน่ง: ${role.name}`} />
       <div className="w-full h-full flex flex-col pt-2 pb-6">
         {/* Header Actions */}
         <div className="flex items-center mb-6 gap-3">

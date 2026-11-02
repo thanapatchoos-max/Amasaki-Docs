@@ -7,3 +7,11 @@ export const loginValidator = vine.create({
   username: username(),
   password: password(),
 })
+
+export const signupValidator = vine.create({
+  username: username(),
+  password: password(),
+  passwordConfirmation: vine.string(),
+  fullName: vine.string().optional(),
+  email: vine.string().email().optional(),
+})

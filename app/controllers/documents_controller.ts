@@ -13,7 +13,9 @@ export default class DocumentsController {
     const user = auth.user!
     const { search, type, status, owner, created_from, created_to, expire_from, expire_to } = request.qs()
 
-    let query = Document.query().preload('folder').preload('owner').orderBy('created_at', 'desc')
+    let query = Document.query()
+      .where((q) => q.whereNull('isDeleted').orWhere('isDeleted', false).orWhere('isDeleted', 0))
+      .preload('folder').preload('owner').orderBy('created_at', 'desc')
     
     if (search) {
       query = query.where('name', 'like', `%${search}%`)
@@ -232,7 +234,7 @@ export default class DocumentsController {
        name: uniqueFilename
      })
 
-     const newVersionNumber = document.latestVersion + 1
+     const newVersionNumber = (document.latestVersion || 1) + 1
 
      await DocumentVersion.create({
         documentId: document.id,
@@ -244,6 +246,8 @@ export default class DocumentsController {
 
      document.latestVersion = newVersionNumber
      await document.save()
+
+     await AuditLogService.log(user, 'Edit', document.id, { version: newVersionNumber, filename: file.clientName })
 
      session.flash('success', 'New version uploaded successfully')
      return response.redirect().back()
@@ -264,9 +268,9 @@ export default class DocumentsController {
       .orderBy('version_number', 'desc')
       .firstOrFail()
 
-    await AuditLogService.log(user, 'View', document.id, { version: latestVersion.versionNumber })
+    await AuditLogService.log(user, 'Download', document.id, { version: latestVersion.versionNumber })
 
-    return response.download(app.makePath(`storage/uploads/${latestVersion.filepath}`), document.originalName)
+    return response.attachment(app.makePath(`storage/uploads/${latestVersion.filepath}`), document.originalName)
   }
 
   async downloadVersion({ params, response, auth }: HttpContext) {
@@ -280,12 +284,12 @@ export default class DocumentsController {
     
     if (!canView) return response.unauthorized('Access denied')
 
-    await AuditLogService.log(user, 'View', document.id, { version: version.versionNumber })
+    await AuditLogService.log(user, 'Download', document.id, { version: version.versionNumber })
 
     const ext = document.extension ? `.${document.extension}` : ''
     const downloadName = `${document.originalName.replace(ext, '')}_v${version.versionNumber}${ext}`
     
-    return response.download(app.makePath(`storage/uploads/${version.filepath}`), downloadName)
+    return response.attachment(app.makePath(`storage/uploads/${version.filepath}`), downloadName)
   }
 
   async destroy({ params, response, auth, session }: HttpContext) {
@@ -306,5 +310,29 @@ export default class DocumentsController {
 
     session.flash('success', 'Document moved to trash')
     return response.redirect().toRoute('documents.index')
+  }
+
+  async bulkDestroy({ request, response, auth, session }: HttpContext) {
+    const user = auth.user!
+    const { ids } = request.only(['ids'])
+    
+    if (!Array.isArray(ids) || ids.length === 0) {
+      session.flash('error', 'กรุณาเลือกอย่างน้อย 1 รายการ')
+      return response.redirect().back()
+    }
+
+    let deletedCount = 0
+    for (const id of ids) {
+      const document = await Document.find(id)
+      if (document) {
+        document.isDeleted = true
+        await document.save()
+        await AuditLogService.log(user, 'Delete', document.id, { type: 'document', name: document.name })
+        deletedCount++
+      }
+    }
+
+    session.flash('success', `ย้ายเอกสาร ${deletedCount} รายการลงถังขยะเรียบร้อยแล้ว`)
+    return response.redirect().back()
   }
 }
